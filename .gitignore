@@ -3,18 +3,13 @@
 .env.*
 !.env.example
 
-# Python
-.venv/
-venv/
-__pycache__/
-*.py[cod]
+# Node.js / Vite
+node_modules/
+dist/
 
-# Tests and tooling
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-htmlcov/
+# Test artifacts
+.playwright-cli/
+coverage/
 
 # Editor and OS files
 .DS_Store
