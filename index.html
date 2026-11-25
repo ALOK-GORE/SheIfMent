@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SheIfMent — Inventory Management API & Live Showcase</title>
+    <meta
+      name="description"
+      content="Online inventory management showcase and REST API explorer backed by PostgreSQL with product CRUD, categories, many-to-many tags, filtering, pagination, and Firebase Auth."
+    />
+    <meta property="og:title" content="SheIfMent — Inventory Management API & Live Showcase" />
+    <meta
+      property="og:description"
+      content="Online inventory management showcase and REST API explorer backed by PostgreSQL with product CRUD, categories, many-to-many tags, filtering, pagination, and Firebase Auth."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('sheifment-theme');
+          if (saved === 'light') {
+            document.documentElement.classList.remove('dark');
+          } else {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body class="bg-slate-50 text-slate-900 dark:bg-[#0B0F17] dark:text-slate-100 antialiased selection:bg-blue-500/20 selection:text-blue-600 dark:selection:text-blue-300">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

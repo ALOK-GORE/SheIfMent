@@ -1,0 +1,5 @@
+{
+  "name": "SheIfMent",
+  "description": "Online inventory management showcase and REST API explorer backed by PostgreSQL with product CRUD, categories, many-to-many tags, filtering, pagination, and Firebase Auth.",
+  "requestFramePermissions": []
+}
