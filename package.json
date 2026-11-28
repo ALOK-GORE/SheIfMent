@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
+    "ui": "vite",
     "build": "vite build",
     "start": "NODE_ENV=production tsx server.ts",
     "lint": "tsc --noEmit && eslint src server.ts",

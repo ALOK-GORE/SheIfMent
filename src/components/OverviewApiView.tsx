@@ -12,44 +12,46 @@ interface EndpointSpec {
   sampleBody?: Record<string, unknown>;
 }
 
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') || '/api';
+
 const ENDPOINTS: EndpointSpec[] = [
   {
     id: 'health',
     method: 'GET',
-    path: '/api/health',
-    testPath: '/api/health',
+    path: `${API_BASE}/health`,
+    testPath: `${API_BASE}/health`,
     access: 'Public',
     purpose: 'Service health check',
   },
   {
     id: 'auth-me',
     method: 'GET',
-    path: '/api/auth/me',
-    testPath: '/api/auth/me',
+    path: `${API_BASE}/auth/me`,
+    testPath: `${API_BASE}/auth/me`,
     access: 'Bearer Token',
     purpose: 'Inspect the authenticated user profile',
   },
   {
     id: 'products-list',
     method: 'GET',
-    path: '/api/products?skip=0&limit=5',
-    testPath: '/api/products?skip=0&limit=5',
+    path: `${API_BASE}/products?skip=0&limit=5`,
+    testPath: `${API_BASE}/products?skip=0&limit=5`,
     access: 'Public',
     purpose: 'List products with pagination, category_id, max_price, and search filters',
   },
   {
     id: 'products-one',
     method: 'GET',
-    path: '/api/products/{id}',
-    testPath: '/api/products/1',
+    path: `${API_BASE}/products/{id}`,
+    testPath: `${API_BASE}/products/1`,
     access: 'Public',
     purpose: 'Retrieve a single product with joined category and tags',
   },
   {
     id: 'products-create',
     method: 'POST',
-    path: '/api/products',
-    testPath: '/api/products',
+    path: `${API_BASE}/products`,
+    testPath: `${API_BASE}/products`,
     access: 'Bearer Token',
     purpose: 'Create a validated product (returns 401 when signed out)',
     sampleBody: {
@@ -63,24 +65,24 @@ const ENDPOINTS: EndpointSpec[] = [
   {
     id: 'products-tag',
     method: 'POST',
-    path: '/api/products/{id}/tags/{tag_id}',
-    testPath: '/api/products/1/tags/1',
+    path: `${API_BASE}/products/{id}/tags/{tag_id}`,
+    testPath: `${API_BASE}/products/1/tags/1`,
     access: 'Bearer Token',
     purpose: 'Attach a tag to a product (idempotent composite key insert)',
   },
   {
     id: 'categories-list',
     method: 'GET',
-    path: '/api/categories',
-    testPath: '/api/categories',
+    path: `${API_BASE}/categories`,
+    testPath: `${API_BASE}/categories`,
     access: 'Public',
     purpose: 'List categories with their associated products',
   },
   {
     id: 'tags-list',
     method: 'GET',
-    path: '/api/tags',
-    testPath: '/api/tags',
+    path: `${API_BASE}/tags`,
+    testPath: `${API_BASE}/tags`,
     access: 'Public',
     purpose: 'List all tags with linked products',
   },
