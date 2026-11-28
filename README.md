@@ -1,42 +1,73 @@
 # SheIfMent
 
-An online inventory management REST API and interactive web showcase backed by **PostgreSQL** (Cloud SQL), **Drizzle ORM**, **Express**, **Firebase Authentication**, and **React**.
+A REST API for inventory management built with **FastAPI**, **SQLAlchemy**, **Alembic**, and **PostgreSQL** (compatible with **Neon**), paired with a clean **React + Tailwind CSS** web interface for interactive showcase and interview walkthroughs.
 
-Originally designed in Python (FastAPI + SQLAlchemy + Alembic), this deployment runs the same relational inventory domain, validation constraints, filtering, pagination, and protected write endpoints online so reviewers and interviewers can explore the project directly in the browser.
+## Backend Features (FastAPI)
 
-## Features
+- User registration and login with Argon2 password hashing (`app/auth.py`, `app/routers/auth.py`)
+- JWT bearer-token authentication for protected write operations (`app/dependencies.py`)
+- Product create, read, update, and delete endpoints (`app/routers/products.py`)
+- Category and tag management, including many-to-many product tagging (`app/routers/categories.py`, `app/routers/tags.py`)
+- Product filtering by category and maximum price, plus pagination with `skip` and `limit`
+- Pydantic request validation and consistent HTTP error responses (`404`, `409`, `422`)
+- Database schema migrations with Alembic (`alembic/`)
+- Automated API tests using FastAPI's `TestClient` (`tests/`)
 
-- **Live Inventory Catalog**: Browse seeded products with search, category filter, max-price filter, and `skip`/`limit` pagination.
-- **Relational Data Model**: One-to-many `categories -> products` (with `ON DELETE RESTRICT` returning `409 Conflict` when non-empty) and many-to-many `products <-> tags` via a composite-key `product_tags` join table.
-- **Protected Write Authentication**: Public read endpoints for browsing; all create, update, delete, and tag-assignment routes verify Firebase ID Bearer tokens and synchronize users in PostgreSQL.
-- **Interactive API Explorer**: Test live REST endpoints directly from the UI and inspect real HTTP status codes and JSON payloads.
-- **Dark & Light Themes**: Dark theme by default with a persistent light/dark theme switch.
+## Running the FastAPI Backend (Local or Neon Postgres)
 
-## Main Endpoints
+1. Create and activate a virtual environment:
 
-| Method | Endpoint | Access | Purpose |
-| --- | --- | --- | --- |
-| `GET` | `/api/health` | Public | Service health check |
-| `GET` | `/api/auth/me` | Bearer token | Current authenticated user profile |
-| `GET` | `/api/products` | Public | List products (`skip`, `limit`, `category_id`, `max_price`, `search`) |
-| `GET` | `/api/products/:id` | Public | Retrieve one product with category and tags |
-| `POST` | `/api/products` | Bearer token | Create a product |
-| `PUT` | `/api/products/:id` | Bearer token | Update a product |
-| `DELETE` | `/api/products/:id` | Bearer token | Delete a product |
-| `POST` | `/api/products/:id/tags/:tagId` | Bearer token | Attach a tag to a product |
-| `DELETE` | `/api/products/:id/tags/:tagId` | Bearer token | Detach a tag from a product |
-| `GET` | `/api/categories` | Public | List categories with linked products |
-| `POST` | `/api/categories` | Bearer token | Create a category |
-| `PUT` | `/api/categories/:id` | Bearer token | Rename a category |
-| `DELETE` | `/api/categories/:id` | Bearer token | Delete an unused category |
-| `GET` | `/api/tags` | Public | List tags with linked products |
-| `POST` | `/api/tags` | Bearer token | Create a tag |
-| `DELETE` | `/api/tags/:id` | Bearer token | Delete a tag |
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # Windows: .venv\Scripts\activate
+   ```
 
-## Scripts
+2. Install Python dependencies:
 
-- `npm run dev` — Start the Express API + Vite dev server on port 3000
-- `npm run build` — Build the production React bundle
-- `npm run start` — Serve the built app and API in production mode
-- `npm run lint` — Run TypeScript typecheck and ESLint
-- `npm test` — Run unit tests for validation, pagination parsing, and inventory metrics
+   ```bash
+   python -m pip install -r requirements.txt
+   ```
+
+3. Create a `.env` file with your PostgreSQL or **Neon** connection string and JWT settings:
+
+   ```env
+   DATABASE_URL=postgresql://USER:PASSWORD@YOUR-NEON-HOST.neon.tech/neondb?sslmode=require
+   JWT_SECRET_KEY=replace-with-a-long-random-secret
+   JWT_ALGORITHM=HS256
+   ACCESS_TOKEN_EXPIRE_MINUTES=30
+   CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+   ```
+
+   `app/database.py` and `alembic/env.py` automatically normalize standard `postgresql://` / `postgres://` Neon URLs to `postgresql+psycopg://` for `psycopg` v3.
+
+4. Apply Alembic migrations:
+
+   ```bash
+   alembic upgrade head
+   ```
+
+5. Start the FastAPI server:
+
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+
+   - Swagger UI: `http://127.0.0.1:8000/docs`
+   - ReDoc: `http://127.0.0.1:8000/redoc`
+   - Health check: `http://127.0.0.1:8000/health`
+
+6. Run backend tests:
+
+   ```bash
+   python -m pytest -v
+   ```
+
+## Running the Frontend UI
+
+```bash
+npm install
+npm run dev
+```
+
+- By default in AI Studio (a Node.js-only container without `pip3`), `server.ts` serves the React UI together with a PostgreSQL-backed preview mirror of the SheIfMent API so the live online demo works in the browser.
+- To connect the React frontend directly to your FastAPI server, set `VITE_API_BASE_URL=http://127.0.0.1:8000` (or your hosted FastAPI URL).

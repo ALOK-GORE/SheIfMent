@@ -15,11 +15,14 @@ export class ApiError extends Error {
   }
 }
 
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') || '/api';
+
 async function request<T>(
-  url: string,
+  path: string,
   options: RequestInit = {},
   token?: string | null
 ): Promise<T> {
+  const url = `${API_BASE}${path}`;
   const headers: Record<string, string> = {
     ...(options.body ? { 'Content-Type': 'application/json' } : {}),
     ...(options.headers as Record<string, string> | undefined),
@@ -56,7 +59,7 @@ async function request<T>(
 }
 
 export const api = {
-  getProducts(params: {
+  async getProducts(params: {
     skip?: number;
     limit?: number;
     category_id?: number;
@@ -70,12 +73,27 @@ export const api = {
     if (params.max_price !== undefined) searchParams.set('max_price', String(params.max_price));
     if (params.search) searchParams.set('search', params.search);
     const qs = searchParams.toString();
-    return request<PaginatedProductsResponse>(`/api/products${qs ? `?${qs}` : ''}`);
+    const res = await request<PaginatedProductsResponse | ProductResponse[]>(
+      `/products${qs ? `?${qs}` : ''}`
+    );
+    if (Array.isArray(res)) {
+      const normalized = res.map((p) => ({
+        ...p,
+        category_id: p.category_id ?? p.category.id,
+      }));
+      return {
+        items: normalized,
+        total: (params.skip ?? 0) + normalized.length,
+        skip: params.skip ?? 0,
+        limit: params.limit ?? 20,
+      };
+    }
+    return res;
   },
 
   createProduct(payload: ProductPayload, token: string | null): Promise<ProductResponse> {
     return request<ProductResponse>(
-      '/api/products',
+      '/products',
       { method: 'POST', body: JSON.stringify(payload) },
       token
     );
@@ -87,19 +105,19 @@ export const api = {
     token: string | null
   ): Promise<ProductResponse> {
     return request<ProductResponse>(
-      `/api/products/${productId}`,
+      `/products/${productId}`,
       { method: 'PUT', body: JSON.stringify(payload) },
       token
     );
   },
 
   deleteProduct(productId: number, token: string | null): Promise<void> {
-    return request<void>(`/api/products/${productId}`, { method: 'DELETE' }, token);
+    return request<void>(`/products/${productId}`, { method: 'DELETE' }, token);
   },
 
   attachTag(productId: number, tagId: number, token: string | null): Promise<ProductResponse> {
     return request<ProductResponse>(
-      `/api/products/${productId}/tags/${tagId}`,
+      `/products/${productId}/tags/${tagId}`,
       { method: 'POST' },
       token
     );
@@ -107,19 +125,19 @@ export const api = {
 
   detachTag(productId: number, tagId: number, token: string | null): Promise<ProductResponse> {
     return request<ProductResponse>(
-      `/api/products/${productId}/tags/${tagId}`,
+      `/products/${productId}/tags/${tagId}`,
       { method: 'DELETE' },
       token
     );
   },
 
   getCategories(): Promise<CategoryResponse[]> {
-    return request<CategoryResponse[]>('/api/categories');
+    return request<CategoryResponse[]>('/categories');
   },
 
   createCategory(name: string, token: string | null): Promise<CategoryResponse> {
     return request<CategoryResponse>(
-      '/api/categories',
+      '/categories',
       { method: 'POST', body: JSON.stringify({ name }) },
       token
     );
@@ -127,29 +145,29 @@ export const api = {
 
   updateCategory(categoryId: number, name: string, token: string | null): Promise<CategoryResponse> {
     return request<CategoryResponse>(
-      `/api/categories/${categoryId}`,
+      `/categories/${categoryId}`,
       { method: 'PUT', body: JSON.stringify({ name }) },
       token
     );
   },
 
   deleteCategory(categoryId: number, token: string | null): Promise<void> {
-    return request<void>(`/api/categories/${categoryId}`, { method: 'DELETE' }, token);
+    return request<void>(`/categories/${categoryId}`, { method: 'DELETE' }, token);
   },
 
   getTags(): Promise<TagResponse[]> {
-    return request<TagResponse[]>('/api/tags');
+    return request<TagResponse[]>('/tags');
   },
 
   createTag(name: string, token: string | null): Promise<TagResponse> {
     return request<TagResponse>(
-      '/api/tags',
+      '/tags',
       { method: 'POST', body: JSON.stringify({ name }) },
       token
     );
   },
 
   deleteTag(tagId: number, token: string | null): Promise<void> {
-    return request<void>(`/api/tags/${tagId}`, { method: 'DELETE' }, token);
+    return request<void>(`/tags/${tagId}`, { method: 'DELETE' }, token);
   },
 };
